@@ -445,7 +445,6 @@ public:
 
 int main(){
   theClient *client = new theClient();
-  client -> onLogin("shoh4629@gmail.com", "Danoh0721");
   client -> startInterface();
 
   while(1){
