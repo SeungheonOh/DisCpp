@@ -273,7 +273,8 @@ public:
 
     m_me = User();
     if(id == ""){
-        while((c = getch()) != 10){
+      std::cout << "\033[u" << "Type your Email and Password" << std::endl << "\033[s";
+      while((c = getch()) != 10){
         std::cout << "\033[u";
         for(int i = 0; i < buffer.length(); i++){
           std::cout << " ";
