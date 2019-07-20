@@ -4,7 +4,7 @@ LIB = -lboost_system -lpthread -lssl -lcrypto -ljsoncpp -lcurl -lcurlpp
 
 CXX = g++
 CFLAGS = -g
-TARGET = test
+TARGET = DisCpp
 
 $(TARGET) : $(OBJECTS)
 	$(CXX) -o $@ $(OBJECTS) $(LIB)
