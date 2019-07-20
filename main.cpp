@@ -8,6 +8,7 @@
 #include <map>
 #include <queue>
 #include <algorithm>
+#include <ctime>
 #include <thread>
 #include <mutex>
 
@@ -61,6 +62,18 @@ public:
     m_messageDemon -> join();
     delete m_messageDemon;
   }
+  std::string formatTime(std::string s){
+    std::tm time;
+    std::stringstream ret;
+    std::istringstream(s) >> std::get_time(&time, "%Y-%m-%dT%H:%M:%S");
+    std::time_t UTCTime = timegm(&time);
+    std::time_t localTime = mktime(&time);
+    std::time_t t = localTime + (UTCTime - localTime);
+
+    ret << std::put_time(std::localtime(&t), "%m/%d/%Y %H:%M");
+    return ret.str();
+  }
+
   // util
   std::string formatMessage(Message message){
     std::string buffer;
@@ -71,6 +84,8 @@ public:
       buffer += nick[i];
     }
     nick = buffer;
+
+    // Space Calc
     buffer = "";
     for(int j = 0; j < m_usernameLength; j++){
       if(nick.length() <= j){
@@ -79,7 +94,9 @@ public:
       }
       buffer += nick[j];
     }
-    return buffer + " | " + EmojiTools::deEmojize(message.content());
+
+    //return buffer + formatTime(message.timestamp()) + " \n " + EmojiTools::deEmojize(message.content());
+    return  "\033[36m" + formatTime(message.timestamp()) + "\033[37m" + " | " + buffer + " | " + EmojiTools::deEmojize(message.content());
   }
   std::string formatDivider(){
     std::string buffer;
@@ -94,6 +111,11 @@ public:
   }
   void onMessageCreate(std::string s) override{
     if(Message(s).channelId() == m_currentChannel.id()){
+      if(m_nicknames.find(Message(s).author().id().asString()) == m_nicknames.end() && m_currentChannel.m_type != 1){
+        Json::Value member = util::StringToJson(request("/guilds/" + m_currentServer.id().asString() + "/members/" + Message(s).author().id().asString(),
+                                                        util::generateHeader("application/json", token()), "GET"));
+        m_nicknames.insert(std::pair<std::string, std::string>(User(util::JsonToString(member["user"])).id().asString(), member["nick"].asString()));
+      }
       print(formatMessage(Message(s)));
     }
   }
@@ -145,6 +167,9 @@ public:
 
     // Setting Channel
     print(formatDivider());
+    m_prompt = repl(m_promptTemplete, "%s", m_currentServer.name());
+    m_prompt = repl(m_prompt, "%c", "");
+
     loadChannel();
     if(s != ""){
       for(auto val : m_channels){
@@ -419,8 +444,8 @@ public:
 
 
 int main(){
-
   theClient *client = new theClient();
+  client -> onLogin("shoh4629@gmail.com", "Danoh0721");
   client -> startInterface();
 
   while(1){
