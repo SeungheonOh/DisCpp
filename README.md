@@ -20,15 +20,16 @@ than just clone the repo, with **--recurse-submodules** this command. The comman
 Just type ```make``` and it will generate ```DisCpp``` execuatble, and you can put it on wherever you wish!
 
 # Commands
-| Commands                                  | Perpose                                                                                        |
-| :login                                             | Login with your discord account                                            |
-| :login ```email``` ```password``` | Login with your discord account                                             |
-| :servers                                        | List your servers                                                                         |
-| :servers ```servername```          | access to the server                                                                  |
-| :channels                                     | List your channel, requires setting server before             |
-| :channels ```channelname```    | access to the channel, requires setting server before    |
-| :status ```status```                       | change the name of game you are playing                         | 
-| :exit                                               | terminates the program                                                          |
+| Commands                          | Perpose                                               |
+|-----------------------------------|-------------------------------------------------------|
+| :login                            | Login with your discord account                       |
+| :login ```email``` ```password``` | Login with your discord account                       |
+| :servers                          | List your servers                                     |
+| :servers ```Server Name```        | access to the server                                  |
+| :channels                         | List your channel, requires setting server before     |
+| :channels ```Channel Name```      | access to the channel, requires setting server before |
+| :status ```status```              | change the name of game that you are playing          |
+| :exit                             | terminates the program                                |
 
 
 # Demo
