@@ -4,7 +4,7 @@ Are you looking for a keyboard centric discord client, that does not require you
 # Preparations
 DisCpp uses a few external libraries such as jsoncpp, libcurl, curlpp, and more.
 In Linux, fortunately, your package manager will take all the care.
-Here's the list of packages that is reqired to compile DisCpp :
+Here's the list of packages that are reqired to compile DisCpp :
 ```
 boost_system ( 1.69 or lower)
 websocketpp
