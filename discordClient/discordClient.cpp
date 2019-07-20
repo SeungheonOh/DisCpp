@@ -156,6 +156,14 @@ bool discordClient::IsTwoFactorAccount(std::string email, std::string password){
   root = util::StringToJson(this -> request("/auth/login", header, JsonPayload, "POST"));
 
   if(root["ticket"].asString() == ""){
+    if(root["token"].asString() == ""){
+      return false;
+    }
+
+    m_accessToken = root["token"].asString();
+
+    root = util::StringToJson(this -> request("/users/@me", util::generateHeader("application/json", m_accessToken), "GET"));
+    m_me = User(util::JsonToString(root));
     return false;
   }
   return true;

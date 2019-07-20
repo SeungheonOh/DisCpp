@@ -359,9 +359,6 @@ public:
       std::cout << "\033[u";
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
       login(id, pass, buffer);
-    } else {
-      std::this_thread::sleep_for(std::chrono::milliseconds(500));
-      login(id, pass);
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(400));
     print(formatDivider());
