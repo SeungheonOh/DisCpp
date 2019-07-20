@@ -375,7 +375,7 @@ public:
     }
     print(formatDivider());
     if(m_me.username() != ""){
-      print("Loged In");
+      print("Logged In");
       print("Welcom " + m_me.username());
       if(!connect()){
         print("Failed to open websocket connection, try :reconnect");
