@@ -99,7 +99,6 @@ bool discordClient::login(std::string email, std::string password){
   root = util::StringToJson(this -> request("/auth/login", header, JsonPayload, "POST"));
 
   if(root["token"].asString() == ""){
-    std::cout << root << std::endl;
     return false;
   }
 

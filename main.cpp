@@ -363,7 +363,7 @@ public:
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
       login(id, pass);
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    std::this_thread::sleep_for(std::chrono::milliseconds(400));
     print(formatDivider());
     if(m_me.username() != ""){
       print("Logged In");
