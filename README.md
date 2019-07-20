@@ -1,5 +1,5 @@
 # DisCpp
-Are you looking for some keyboard centric discord client, that does not require you to use pointing device, the mouse, at all? Than, you found the correct one! DisCpp is a Cli Discord client, written in C++!
+Are you looking for a keyboard centric discord client, that does not require you to use pointing device, the mouse, at all?  Than, you found the right one! DisCpp is a Cli Discord client, written in C++! 
 
 # Preperations
 DisCpp is made out of few external libraries such as Jsoncpp, libcurl, curlpp, and more.
