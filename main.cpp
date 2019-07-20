@@ -104,8 +104,16 @@ public:
 
   // interface event
   void onServers(std::string s) override{
-    loadServer();
+    if(token() == "")return;
     print(formatDivider());
+    if(s == "DM"){
+      m_prompt = repl(m_promptTemplete, "%s", "");
+      m_currentServer = Guild();
+      print("Task Completed");
+      onChannels("");
+      return;
+    }
+    loadServer();
     if(s != ""){
       if(!setServer(s)){
         print("Invalid Server");
@@ -126,8 +134,7 @@ public:
     }
   }
   void onChannels(std::string s) override{
-    if(m_currentServer.name() == "")return;
-
+    if(token() == "")return;
     for(int i = 0; i < 1000; i++){
       if(m_messageQueueLock.try_lock())break;
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -137,11 +144,11 @@ public:
     m_currentChannel = Channel();
 
     // Setting Channel
-    loadChannel();
     print(formatDivider());
+    loadChannel();
     if(s != ""){
       for(auto val : m_channels){
-        if(s == val.name() && val.m_parentId.asString() == ""){
+        if(s == val.name() && val.m_type == 4){
           print("Invalid Channel");
           return;
         }
@@ -151,11 +158,12 @@ public:
         return;
       }
       print("Task Completed");
+      m_prompt = repl(m_promptTemplete, "%s", m_currentServer.name());
       m_prompt = repl(m_prompt, "%c", "/" + s);
       std::vector<Message> mess = getChannelMessages();
       std::reverse(mess.begin(), mess.end());
       for(auto i : mess){
-        if(m_nicknames.find(i.author().id().asString()) == m_nicknames.end()){
+        if(m_nicknames.find(i.author().id().asString()) == m_nicknames.end() && m_currentChannel.m_type != 1){
           Json::Value member = util::StringToJson(request("/guilds/" + m_currentServer.id().asString() + "/members/" + i.author().id().asString(),
                                                            util::generateHeader("application/json", token()), "GET"));
           m_nicknames.insert(std::pair<std::string, std::string>(User(util::JsonToString(member["user"])).id().asString(), member["nick"].asString()));
@@ -171,48 +179,39 @@ public:
                                                     });
 
     std::map<std::string, std::vector<Channel>> channelList;
+    std::vector<Channel> categories;
 
-    for(auto channel : m_channels){
-      std::map<std::string, std::vector<Channel>>::iterator it;
-      it = channelList.find(channel.m_parentId.asString());
-      if(it == channelList.end()){
-        channelList.insert(std::pair<std::string, std::vector<Channel>>(channel.m_parentId.asString(), std::vector<Channel>(1, channel)));
-      } else{
-        it -> second.push_back(channel);
+    if(m_currentServer.name() == ""){
+      channelList.insert(std::pair<std::string, std::vector<Channel>>("100000000000000000", m_channels));
+      m_channels.push_back(Channel("{\"permission_overwrites\": [],\"name\": \"DM\",\"parent_id\": null,\"position\": 0,\"type\": 4,\"id\": \"100000000000000000\"}"));
+      categories.push_back(Channel("{\"permission_overwrites\": [],\"name\": \"DM\",\"parent_id\": null,\"position\": 0,\"type\": 4,\"id\": \"100000000000000000\"}"));
+    } else {
+      for(auto channel : m_channels){
+        std::map<std::string, std::vector<Channel>>::iterator it;
+        it = channelList.find(channel.m_parentId.asString());
+        if(it == channelList.end()){
+          channelList.insert(std::pair<std::string, std::vector<Channel>>(channel.m_parentId.asString(), std::vector<Channel>(1, channel)));
+        } else{
+          it -> second.push_back(channel);
+        }
+      }
+
+      for(auto const &a : channelList){
+        for(auto const &val : m_channels){
+          if(val.id().asString() == a.first && val.m_parentId.asString() == "")categories.push_back(val);
+        }
       }
     }
-
-    std::vector<Channel> cats;
-    for(auto const &a : channelList){
-      for(auto const &val : m_channels){
-        if(val.id().asString() == a.first && val.m_parentId.asString() == "")cats.push_back(val);
-      }
-    }
-    std::sort(cats.begin(), cats.end(), [](Channel const &a, Channel const &b) -> bool{
+    std::sort(categories.begin(), categories.end(), [](Channel const &a, Channel const &b) -> bool{
                                                       return a.m_position < b.m_position;
                                                     });
 
-    int cataSize = 50;
-    int cataTabSize = 2;
-    char cataMat = '+';
-    for(auto cat : cats){
+    int categoryChannelTabSpaces = 2;
+    for(auto category : categories){
       std::map<std::string, std::vector<Channel>>::iterator it;
-      it = channelList.find(cat.id().asString());
-      std::string buffer = "";
-      for(auto val : m_channels){
-        if(val.id().asString() == it->first){
-          /*
-          for(int i = 0; i < (cataSize - val.name().length()) / 2; i++){
-            buffer += cataMat;
-          }
-          buffer += val.name();
-          for(int i = 0; i < (cataSize - val.name().length()) / 2 + (cataSize - val.name().length()) % 2; i++){
-            buffer += cataMat;
-          }
-          */
-          buffer += val.name();
-        }
-      }
+      it = channelList.find(category.id().asString());
+      std::string buffer = category.name();
+
       std::string divider = "┌";
       for(int i = 0; i < buffer.length(); i++)divider += "─";
       divider += "┐";
@@ -222,7 +221,7 @@ public:
 
       divider = "└";
       for(int i = 0; i < buffer.length(); i++){
-        if(i == cataTabSize - 1){
+        if(i == categoryChannelTabSpaces - 1){
           divider += "┬";
           continue;
         }
@@ -232,9 +231,9 @@ public:
       print(divider);
 
       for(int i = 0; i < it -> second.size(); i++){
-        if(it -> second[i].m_parentId.asString() == "")continue;
+        if(it -> first == it -> second[i].id().asString())continue;
         std::string space;
-        for(int i = 0; i < cataTabSize; i++){
+        for(int i = 0; i < categoryChannelTabSpaces; i++){
           space += " ";
         }
         if(i + 1 == it -> second.size())space += "└";
@@ -242,16 +241,6 @@ public:
         print(space + it -> second[i].name());
       }
     }
-    /*
-    for(int i = 0; i < m_channels.size(); i++){
-      print(m_channels[i].name() + " " + std::to_string(m_channels[i].m_type) + " " + std::to_string(m_channels[i].position()));
-      if(std::to_string(m_channels[i].m_type) == "4"){
-        print(m_channels[i].id().asString());
-      } else {
-        print(m_channels[i].m_parentId.asString());
-      }
-    }
-    */
 
   }
   void onSend(std::string s) override{
@@ -374,6 +363,7 @@ public:
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
       login(id, pass);
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
     print(formatDivider());
     if(m_me.username() != ""){
       print("Logged In");

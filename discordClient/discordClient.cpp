@@ -99,6 +99,7 @@ bool discordClient::login(std::string email, std::string password){
   root = util::StringToJson(this -> request("/auth/login", header, JsonPayload, "POST"));
 
   if(root["token"].asString() == ""){
+    std::cout << root << std::endl;
     return false;
   }
 
@@ -578,18 +579,33 @@ bool discordClient::setServer(std::string serverName){
 }
 
 void discordClient::loadChannel(){
-  if(m_accessToken == "" || m_currentServer.id().asString() == "")return;
+  if(m_accessToken == "")return;
   Json::Value root;
 
-  root = util::StringToJson(this -> request("/guilds/" + m_currentServer.id().asString() + "/channels",
-                         util::generateHeader("application/json", m_accessToken),
-                         "GET"));
-  if(root.size() <= 0) return;
+  if(m_currentServer.id().asString() == ""){
+    root = util::StringToJson(this -> request("/users/@me/channels",
+                                              util::generateHeader("application/json", m_accessToken),
+                                              "GET"));
+    if(root.size() <= 0) return;
 
-  m_channels.clear();
+    m_channels.clear();
 
-  for(int i = 0; i < root.size(); i++){
-    m_channels.push_back(Channel(util::JsonToString(root[i])));
+    for(int i = 0; i < root.size(); i++){
+      Json::Value temp = root[i];
+      temp["name"] = temp["recipients"][0]["username"];
+      m_channels.push_back(Channel(util::JsonToString(temp)));
+    }
+  } else {
+    root = util::StringToJson(this -> request("/guilds/" + m_currentServer.id().asString() + "/channels",
+                          util::generateHeader("application/json", m_accessToken),
+                          "GET"));
+    if(root.size() <= 0) return;
+
+    m_channels.clear();
+
+    for(int i = 0; i < root.size(); i++){
+      m_channels.push_back(Channel(util::JsonToString(root[i])));
+    }
   }
 }
 

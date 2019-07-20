@@ -143,7 +143,12 @@ void Cli::interface(){
         break;
       case 3:
         if(userinput.size() > 1){
-          onChannels(userinput[1]);
+          std::string temp;
+          for(int i = 1; i < userinput.size(); i++){
+            if(i != 1) temp += " ";
+            temp += userinput[i];
+          }
+          onChannels(temp);
         } else{
           onChannels("");
         }
