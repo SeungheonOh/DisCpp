@@ -1,10 +1,10 @@
 # DisCpp
-Are you looking for a keyboard centric discord client, that does not require you to use pointing device, the mouse, at all?  Than, you found the right one! DisCpp is a Cli Discord client, written in C++! 
+Are you looking for a keyboard centric discord client, that does not require you to use pointing device, the mouse, at all?  Then, you found the right one! DisCpp is a CLI Discord client, written in C++! 
 
-# Preperations
-DisCpp is made out of few external libraries such as Jsoncpp, libcurl, curlpp, and more.
-In linux, fortunatly, your package manager will take all the cares.
-Here's the list of packages that is reqired to compile DisCpp :
+# Preparations
+DisCpp uses a few external libraries such as jsoncpp, libcurl, curlpp, and more.
+In Linux, fortunately, your package manager will take all the care.
+Here's the list of packages that are reqired to compile DisCpp :
 ```
 boost_system ( 1.69 or lower)
 websocketpp
@@ -14,13 +14,13 @@ jsoncpp
 libcurl
 curlpp
 ```
-than just clone the repo, with **--recurse-submodules** this command. The command is for cloning EmojiTools, the submoudel, as well.
+Then, just clone the repo using git with the **--recurse-submodules** option, which is for cloning EmojiTools, the submodule, as well.
 
 # Installation
-Just type ```make``` and it will generate ```DisCpp``` execuatble, and you can put it on wherever you wish!
+Just type ```make``` and it will create a ```DisCpp``` execuatble, and you can put it on wherever you wish!
 
 # Commands
-| Commands                          | Perpose                                               |
+| Commands                          | Purpose                                               |
 |-----------------------------------|-------------------------------------------------------|
 | :login                            | Login with your discord account                       |
 | :login ```email``` ```password``` | Login with your discord account                       |
@@ -32,5 +32,4 @@ Just type ```make``` and it will generate ```DisCpp``` execuatble, and you can p
 | :exit                             | terminates the program                                |
 
 
-# Demo
-(https://www.reddit.com/r/unixporn/comments/cfd64p/oc_new_cli_discord_client_discpp_that_is_purely/?utm_source=share&utm_medium=web2x)
+# [Demo](https://www.reddit.com/r/unixporn/comments/cfd64p/oc_new_cli_discord_client_discpp_that_is_purely/?utm_source=share&utm_medium=web2x)
