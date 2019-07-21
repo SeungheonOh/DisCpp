@@ -23,7 +23,7 @@ public:
   };
   const std::string m_promptTemplete;
   std::string m_prompt;
-  std::string buffer;
+  std::string m_buffer;
   std::thread *m_interface;
 
   Cli();

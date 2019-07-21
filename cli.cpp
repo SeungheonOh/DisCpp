@@ -53,12 +53,12 @@ int Cli::getch(){
 
 void Cli::print(std::string s){
   std::cout << "\033[u";
-  for(int i = 0; i < buffer.length() + m_prompt.length(); i++){
+  for(int i = 0; i < m_buffer.length() + m_prompt.length(); i++){
     std::cout << " ";
   }
   std::cout << "\033[u";
   std::cout << s << std::endl << "\033[s";
-  std::cout << repl(m_prompt, "%c", "") << buffer;
+  std::cout << repl(m_prompt, "%c", "") << m_buffer;
   std::flush(std::cout);
 }
 
@@ -70,7 +70,7 @@ void Cli::interface(){
     int cursor = 0;
     while((c = getch()) != 10){
       std::cout << "\033[u";
-      for(int i = 0; i < buffer.length() + m_prompt.length(); i++){
+      for(int i = 0; i < m_buffer.length() + m_prompt.length(); i++){
         std::cout << " ";
       }
       std::cout << "\033[u";
@@ -78,22 +78,22 @@ void Cli::interface(){
       case 127:
         if(cursor - 1 < 0)break;
         cursor--;
-        buffer.pop_back();
+        m_buffer.pop_back();
         break;
       case 27:
-        buffer.clear();
+        m_buffer.clear();
         cursor = 0;
         break;
       default:
-        buffer.insert(cursor++, 1, c);
+        m_buffer.insert(cursor++, 1, c);
         break;
       }
 
-      std::cout << repl(m_prompt, "%c", "") << buffer;
+      std::cout << repl(m_prompt, "%c", "") << m_buffer;
     }
 
     std::cout << "\033[u";
-    for(int i = 0; i < buffer.length() + m_prompt.length(); i++){
+    for(int i = 0; i < m_buffer.length() + m_prompt.length(); i++){
       std::cout << " ";
     }
     std::cout << "\033[u";
@@ -101,18 +101,18 @@ void Cli::interface(){
     std::vector<std::string> userinput;
     std::string temp = "";
 
-    for(int i = 0; i < buffer.length(); i++){
-      if(buffer[i] == ' '){
+    for(int i = 0; i < m_buffer.length(); i++){
+      if(m_buffer[i] == ' '){
         userinput.push_back(temp);
         temp = "";
         continue;
       }
-      temp += buffer[i];
+      temp += m_buffer[i];
     }
     userinput.push_back(temp);
 
-    temp = buffer;
-    buffer = "";
+    temp = m_buffer;
+    m_buffer = "";
 
     if(events.find(userinput[0]) == events.end()){
       onSend(temp);
@@ -174,12 +174,12 @@ void Cli::interface(){
     }
 
     std::cout << "\033[u";
-    for(int i = 0; i < buffer.length() + m_prompt.length(); i++){
+    for(int i = 0; i < m_buffer.length() + m_prompt.length(); i++){
       std::cout << " ";
     }
     std::cout << "\033[u";
     std::cout << "\033[s";
-    std::cout << repl(m_prompt, "%c", "") << buffer;
+    std::cout << repl(m_prompt, "%c", "") << m_buffer;
 
     std::flush(std::cout);
   }

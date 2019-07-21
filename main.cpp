@@ -49,12 +49,14 @@ public:
   int m_usernameLength;
   int m_commandDividerLength;
   char m_commandDivider;
+  std::string m_mentionColor;
+
   std::mutex m_messageQueueLock;
   std::thread *m_messageDemon;
   std::queue<std::string> m_messageQueue;
   std::map<std::string , std::string> m_nicknames;
 
-  theClient() : m_usernameLength(25) , m_commandDividerLength(40) , m_commandDivider('-'){
+  theClient() : m_usernameLength(25) , m_commandDividerLength(40) , m_commandDivider('-') , m_mentionColor("\033[101m\033[30m"){
     m_messageDemon = new std::thread(&theClient::messageDemon, this);
   }
 
@@ -62,7 +64,8 @@ public:
     m_messageDemon -> join();
     delete m_messageDemon;
   }
-  std::string formatTime(std::string s){
+
+  std::string formatTime(std::string s, std::string format){
     std::tm time;
     std::stringstream ret;
     std::istringstream(s) >> std::get_time(&time, "%Y-%m-%dT%H:%M:%S");
@@ -70,33 +73,81 @@ public:
     std::time_t localTime = mktime(&time);
     std::time_t t = localTime + (UTCTime - localTime);
 
-    ret << std::put_time(std::localtime(&t), "%m/%d/%Y %H:%M");
+    ret << std::put_time(std::localtime(&t), format.c_str());
     return ret.str();
+  }
+
+  std::string formatContent(Message message){
+    std::string rawContent = message.content();
+    std::string ret;
+    int mentionCount = 0;
+    // mentions
+    if(rawContent == ""){
+      return "\033[104m(Attachment)\033[0m";
+    }
+
+    for(int i = 0; i < rawContent.length(); i++){
+      if(rawContent[i] == '\n'){
+      }
+      // Mention Handling
+      else if(i + 20 <= rawContent.length() && rawContent[i] == '<' && rawContent[i + 1] == '@' && rawContent[i + 20] == '>'){
+        for(auto mention : message.mentions()){
+          if(mention.id().asString() == rawContent.substr(i + 2, 18)){
+            ret += m_mentionColor + mention.username() + "\033[0m";
+          }
+        }
+        i += 20;
+      } else if(i + 21 <= rawContent.length() && rawContent[i] == '<' && rawContent[i + 1] == '@' && rawContent[i + 2] == '!' && rawContent[i + 21] == '>'){
+        std::string userId = rawContent.substr(i + 3, 18);
+        std::map<std::string, std::string>::iterator nickname = m_nicknames.find(userId);
+        if(m_nicknames.find(userId) == m_nicknames.end()){
+          Json::Value member = util::StringToJson(request("/guilds/" + m_currentServer.id().asString() + "/members/" + userId,
+                                                           util::generateHeader("application/json", token()), "GET"));
+          m_nicknames.insert(std::pair<std::string, std::string>(User(util::JsonToString(member["user"])).id().asString(), member["nick"].asString()));
+        }
+        ret += m_mentionColor + m_nicknames.find(userId) -> second + "\033[0m";
+
+        i += 21;
+      }
+      // ``` handling
+      else if(false && i + 2 <= rawContent.length() && rawContent[i] == '`' && rawContent[i + 1] == '`' && rawContent[i + 2] == '`'){
+        i -= 1;
+        ret += '\n';
+        while(i + 2 <= rawContent.length() && rawContent[i] == '`' && rawContent[i + 1] == '`' && rawContent[i + 2] == '`'){
+          i++;
+          ret += rawContent[i];
+        }
+        i += 3;
+      }else {
+        ret += rawContent[i];
+      }
+    }
+    return EmojiTools::deEmojize(ret);
   }
 
   // util
   std::string formatMessage(Message message){
     std::string buffer;
-    std::string nick = m_nicknames.find(message.author().id().asString()) -> second;
-    if(nick == "")nick = message.author().username();
-    for(int i = 0; i < nick.length(); i++){
-      if(nick[i] < 0 || nick[i] > 127 || nick[i] == '\n')continue;
-      buffer += nick[i];
+    std::string content;
+    std::string author= m_nicknames.find(message.author().id().asString()) -> second;
+
+    if(author == "")author = message.author().username();
+    for(int i = 0; i < author.length(); i++){
+      if(author[i] < 0 || author[i] > 127 || author[i] == '\n')continue;
+      buffer += author[i];
     }
-    nick = buffer;
 
     // Space Calc
-    buffer = "";
+    author = "";
     for(int j = 0; j < m_usernameLength; j++){
-      if(nick.length() <= j){
-        buffer += " ";
+      if(buffer.length() <= j){
+        author += " ";
         continue;
       }
-      buffer += nick[j];
+      author += buffer[j];
     }
 
-    //return buffer + formatTime(message.timestamp()) + " \n " + EmojiTools::deEmojize(message.content());
-    return  "\033[36m" + formatTime(message.timestamp()) + "\033[37m" + " | " + buffer + " | " + EmojiTools::deEmojize(message.content());
+    return  "\033[36m" + formatTime(message.timestamp(), "%m/%d/%Y %H:%M") + "\033[0m" + " | " + author + " | " + formatContent(message);
   }
   std::string formatDivider(){
     std::string buffer;
