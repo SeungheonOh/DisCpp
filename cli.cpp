@@ -84,12 +84,27 @@ void Cli::interface(){
         m_buffer.clear();
         cursor = 0;
         break;
+      case 8: // Arrow left
+        if(cursor - 1 < 0)break;
+        cursor--;
+        break;
+      case 12: // Arrow right
+        if(cursor + 1 > m_buffer.length())break;
+        cursor++;
+        break;
       default:
         m_buffer.insert(cursor++, 1, c);
         break;
       }
 
-      std::cout << repl(m_prompt, "%c", "") << m_buffer;
+      std::cout << repl(m_prompt, "%c", ""); // << m_buffer;
+      for(int i = 0; i < m_buffer.length(); i++){
+        if(i == cursor){
+          std::cout << "\033[101m" << m_buffer[i] << "\033[0m";
+          continue;
+        }
+        std::cout << m_buffer[i];
+      }
     }
 
     std::cout << "\033[u";
