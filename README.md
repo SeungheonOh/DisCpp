@@ -1,4 +1,4 @@
-# DisCpp
+# DisCpp [![Build Status](https://travis-ci.org/SeungheonOh/DisCpp.svg?branch=master)](https://travis-ci.org/SeungheonOh/DisCpp)
 Are you looking for a keyboard centric discord client, that does not require you to use pointing device, the mouse, at all?  Then, you found the right one! DisCpp is a CLI Discord client, written in C++! 
 
 # Preparations
