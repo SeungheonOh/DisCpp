@@ -1,0 +1,3 @@
+[submodule "EmojiTools"]
+	path = EmojiTools
+	url = https://github.com/seungheonoh/EmojiTools
